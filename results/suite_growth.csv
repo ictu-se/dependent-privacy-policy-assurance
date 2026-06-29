@@ -1,0 +1,5 @@
+strategy,unit_count,interpretation
+Independent checklist,6,"One surface each for schema, role, object, field, audit, and inventory"
+Behavior-changing clause families,6,"Purpose, consent, jurisdiction, threshold, emergency audit, and compound clauses"
+Generated benchmark scenarios,578,Negative cases and paired benign controls used in the study
+Naive cross-product contexts,4032,"Cartesian product of observed roles, purposes, fields, jurisdiction, consent, aggregation, and audit states"

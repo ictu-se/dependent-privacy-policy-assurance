@@ -1,0 +1,17 @@
+{
+  "replicas": 10,
+  "domains": 6,
+  "scenarios": 578,
+  "violations": 344,
+  "benign_controls": 234,
+  "methods": 19,
+  "method_scenario_judgments": 10982,
+  "violation_families": [
+    "aggregation_threshold_leak",
+    "compound_consent_purpose_scope",
+    "consent_gated_field",
+    "emergency_audit_omission",
+    "jurisdiction_conditioned_field",
+    "purpose_conditioned_field"
+  ]
+}

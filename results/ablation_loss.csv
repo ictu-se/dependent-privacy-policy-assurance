@@ -1,0 +1,6 @@
+ablation,recall_loss,risk_weighted_recall_loss,f1_loss
+consent,0.4157,0.514,0.2624
+jurisdiction_field,0.3721,0.4365,0.2286
+purpose_field,0.1802,0.1529,0.099
+threshold,0.1134,0.0864,0.0601
+enhanced_audit,0.1105,0.0753,0.0585
