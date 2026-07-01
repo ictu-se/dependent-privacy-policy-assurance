@@ -79,4 +79,6 @@ Scenario generation is deterministic. Bootstrap resampling uses a fixed seed. Re
 
 ## Citation
 
-If you use this package, cite the archived Zenodo record associated with this release.
+If you use this package, cite the archived Zenodo release:
+
+Nguyen, The-Vinh. (2026). Dependent Privacy-Policy Assurance Replication Package (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.21108687
