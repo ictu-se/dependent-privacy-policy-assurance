@@ -1,0 +1,27 @@
+{
+  "title": "Dependent Privacy-Policy Assurance Replication Package",
+  "upload_type": "software",
+  "description": "Replication package containing the benchmark data, experiment code, reported results, and figure-generation outputs for a study of dependent privacy-policy assurance in public-sector API security contracts.",
+  "creators": [
+    {
+      "name": "Nguyen, The-Vinh"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "version": "1.0.0",
+  "keywords": [
+    "security contract testing",
+    "privacy policy assurance",
+    "public-sector APIs",
+    "risk-weighted evidence",
+    "reproducibility"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/ictu-se/dependent-privacy-policy-assurance",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
