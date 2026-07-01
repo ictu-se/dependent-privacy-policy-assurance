@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependent privacy-policy testing benchmark for paper 07.
+"""Dependent policy-interaction assurance benchmark.
 
 The experiment creates a deterministic benchmark of public-sector API
 request-response observations whose failures require interaction clauses:
@@ -18,7 +18,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
-PROJECT = Path(__file__).resolve().parents[1]
+PROJECT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT / "data"
 RESULTS_DIR = PROJECT / "results"
 FIGURES_DIR = PROJECT / "figures"
@@ -971,8 +971,7 @@ def make_figures(
     plt.close(fig)
 
     selected_false_alarm = [
-        "schema_validation",
-        "basic_policy_aware_full",
+        "risk_heuristic_privacy_linter",
         "keyword_sensitive_privacy_linter",
         "dependent_policy_full",
     ]
@@ -1149,16 +1148,23 @@ def make_figures(
     ax.legend(frameon=False, fontsize=8)
 
     ax = axes[0, 1]
-    image = ax.imshow(false_alarm_matrix, vmin=0, vmax=1, cmap="magma_r")
+    false_alarm_labels = ["risk", "keyword", "full"]
+    x = range(len(benign_families))
+    width = 0.24
+    for offset, label, row_values in zip([-width, 0, width], false_alarm_labels, false_alarm_matrix):
+        ax.bar([i + offset for i in x], row_values, width=width, label=label)
+    ax.set_ylim(0, 1.0)
     ax.set_title("(b) Benign false alarms")
-    ax.set_xticks(range(len(benign_families)))
-    ax.set_xticklabels([f.replace("benign_", "").replace("_", "\n") for f in benign_families], fontsize=7)
-    ax.set_yticks(range(len(selected_false_alarm)))
-    ax.set_yticklabels(["schema", "basic", "keyword", "full"], fontsize=8)
-    fig.colorbar(image, ax=ax, fraction=0.046, pad=0.02)
+    ax.set_ylabel("False-alarm rate")
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(
+        ["authorized\n detail", "cross-juris\n redacted", "emergency\n audited", "small-cell\n suppressed"],
+        fontsize=7,
+    )
+    ax.legend(frameon=False, fontsize=8, ncol=3)
 
     ax = axes[1, 0]
-    selected_domain_methods_short = [
+    selected_family_methods_short = [
         "basic_policy_aware_full",
         "risk_heuristic_privacy_linter",
         "keyword_sensitive_privacy_linter",
@@ -1167,32 +1173,52 @@ def make_figures(
         "dependent_without_consent",
         "dependent_without_jurisdiction_field",
     ]
-    domain_matrix = []
-    for method in selected_domain_methods_short:
+    family_order = [
+        "purpose_conditioned_field",
+        "jurisdiction_conditioned_field",
+        "consent_gated_field",
+        "aggregation_threshold_leak",
+        "emergency_audit_omission",
+        "compound_consent_purpose_scope",
+    ]
+    family_matrix = []
+    for method in selected_family_methods_short:
         row_values = []
-        for domain in domains:
+        for family in family_order:
             items = [
                 row for row in judgments
-                if row["method"] == method and row["domain"] == domain and row["expected_violation"]
+                if row["method"] == method and row["violation_family"] == family and row["expected_violation"]
             ]
             row_values.append(sum(1 for row in items if row["detected"]) / len(items))
-        domain_matrix.append(row_values)
-    image = ax.imshow(domain_matrix, vmin=0, vmax=1, cmap="cividis")
-    ax.set_title("(c) Recall by domain")
-    ax.set_xticks(range(len(domains)))
-    ax.set_xticklabels([d.replace("_", "\n") for d in domains], fontsize=8)
-    ax.set_yticks(range(len(selected_domain_methods_short)))
+        family_matrix.append(row_values)
+    image = ax.imshow(family_matrix, vmin=0, vmax=1, cmap="cividis")
+    ax.set_title("(c) Recall by fault family")
+    ax.set_xticks(range(len(family_order)))
+    ax.set_xticklabels(
+        ["purpose", "juris", "consent", "threshold", "audit", "compound"],
+        rotation=25,
+        ha="right",
+        fontsize=8,
+    )
+    ax.set_yticks(range(len(selected_family_methods_short)))
     ax.set_yticklabels(["basic", "risk", "keyword", "pairwise", "full", "-consent", "-juris"], fontsize=8)
     fig.colorbar(image, ax=ax, fraction=0.046, pad=0.02)
 
     ax = axes[1, 1]
-    labels = [row["ablation"].replace("_", "\n") for row in losses]
-    values = [row["risk_weighted_recall_loss"] for row in losses]
-    ax.bar(labels, values, color="#5b6f95")
-    ax.set_ylim(0, max(values) + 0.08)
-    ax.set_title("(d) Ablation loss")
-    ax.set_ylabel("Risk-weighted recall loss")
-    ax.tick_params(axis="x", labelsize=8)
+    labels = [
+        row["ablation"].replace("jurisdiction_field", "jurisdiction").replace("purpose_field", "purpose")
+        for row in losses
+    ]
+    values = [1.0 - row["risk_weighted_recall_loss"] for row in losses]
+    y = range(len(labels))
+    ax.barh(y, values, color="#5b6f95")
+    ax.axvline(1.0, color="#333333", linewidth=0.8, linestyle="--")
+    ax.set_xlim(0, 1.05)
+    ax.set_title("(d) RWR retained after ablation")
+    ax.set_xlabel("Risk-weighted recall")
+    ax.set_yticks(list(y))
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.invert_yaxis()
     fig.tight_layout()
     fig.savefig(FIGURES_DIR / "result_profile_panels.pdf")
     plt.close(fig)
@@ -1259,7 +1285,7 @@ def main() -> None:
     scenarios = make_scenarios(args.replicas)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    write_jsonl(DATA_DIR / "dependent_policy_scenarios.jsonl", [scenario_to_json(row) for row in scenarios])
+    write_jsonl(DATA_DIR / "scenarios.jsonl", [scenario_to_json(row) for row in scenarios])
 
     judgments = []
     for scenario in scenarios:
